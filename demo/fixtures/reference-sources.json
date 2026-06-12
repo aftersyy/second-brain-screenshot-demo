@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "topic": "Harness Engineering",
+      "keywords": ["harness", "agent", "context engineering", "长任务"],
+      "title": "Harness Engineering 背景笔记",
+      "url": "https://example.com/harness-engineering"
+    },
+    {
+      "topic": "Codex Figma Workflow",
+      "keywords": ["codex", "figma", "设计工作流"],
+      "title": "AI 设计工作流补充资料",
+      "url": "https://example.com/codex-figma"
+    },
+    {
+      "topic": "Triune Brain",
+      "keywords": ["三重脑", "拖延", "心理学"],
+      "title": "三重脑模型参考说明",
+      "url": "https://example.com/triune-brain"
+    }
+  ]
+}

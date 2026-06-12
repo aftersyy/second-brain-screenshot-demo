@@ -1,0 +1,18 @@
+{
+  "items": [
+    {
+      "fixture_id": "codex-figma",
+      "title": "Codex + Figma：从需求到可编辑设计稿",
+      "summary": "Demo 导入会生成一张待审核候选卡，模拟截图抽取后的人工确认流程。",
+      "content": "- 输入需求后由 AI 生成设计规范\n- 再同步到 Figma 页面输出可编辑图层\n- 适合作为评委演示“导入 -> 审核 -> Today”的链路",
+      "insights": "审核通过后，这张卡会立刻进入 Today。",
+      "importance": "high",
+      "tags": ["AI工具", "设计工作流"],
+      "source_type": "demo-upload",
+      "source_files": ["demo/codex-figma.png"],
+      "source_text": "Demo OCR: Codex + Figma design generation workflow.",
+      "confidence": 0.86,
+      "knowledge_date": "__TODAY__"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+# macOS / editor
+.DS_Store
+.obsidian/
+
+# Local environment and runtime state
+.env
+.env.*
+!.env.example
+.openclaw/
+state/
+memory/
+
+# Private workspace identity and personal context
+AGENTS.md
+HEARTBEAT.md
+IDENTITY.md
+MEMORY.md
+SOUL.md
+TOOLS.md
+USER.md
+
+# Generated or personal knowledge data
+card-library/
+cards/
+knowledge-base/
+
+# Local-only project notes and research artifacts
+identity-soul-update_*.md
+knowledge-system-setup_*.md
+docs/PRD_*.md
+docs/产品说明文档_*.md
+*.docx
+skills/
+
+# Node / build output
+node_modules/
+npm-debug.log*
+dist/
+build/
+coverage/

@@ -1,0 +1,78 @@
+{
+  "published_cards": [
+    {
+      "title": "Harness Engineering：让 AI 可靠完成长任务",
+      "summary": "AI 工程正从 Prompt 和 Context 管理，进入以 Harness 为核心的可靠执行阶段。",
+      "content": "- Harness Engineering 的目标是让模型在长任务里保持稳定输出\n- 核心抓手包括任务拆解、上下文治理、外部评估和工具化验证\n- 它解决的不是回答一次问题，而是持续完成复杂工作",
+      "insights": "这张卡最适合继续追问“为什么仅靠 Prompt 不够”“Harness 和 Agent 框架是什么关系”。",
+      "importance": "high",
+      "tags": ["AI", "工程方法论", "前沿趋势"],
+      "source_type": "knowledge-base",
+      "source_files": ["knowledge-base/__TODAY__.md"],
+      "source_text": "Demo fixture: Harness Engineering 摘要",
+      "status": "published",
+      "confidence": 0.98,
+      "knowledge_date": "__TODAY__",
+      "metadata": {
+        "fixture_id": "today-harness",
+        "demo_seed": true
+      }
+    },
+    {
+      "title": "Codex + Figma 工作流",
+      "summary": "Codex 可以把产品需求快速转为 Figma 中的可编辑设计稿，重点在设计规范与工具闭环。",
+      "content": "- 先安装插件并完成连通性测试\n- 再生成 DESIGN.md 统一设计规范\n- 最后由 AI 输出到 Figma 页面形成可编辑图层",
+      "insights": "适合继续追问设计生成是否可复用、适合什么类型的产品需求。",
+      "importance": "high",
+      "tags": ["AI工具", "设计工作流"],
+      "source_type": "knowledge-base",
+      "source_files": ["knowledge-base/__TODAY__.md", "截屏Demo-codex-figma.png"],
+      "source_text": "Demo fixture: Codex + Figma 工作流",
+      "status": "published",
+      "confidence": 0.96,
+      "knowledge_date": "__TODAY__",
+      "metadata": {
+        "fixture_id": "today-codex-figma",
+        "demo_seed": true
+      }
+    },
+    {
+      "title": "三重脑模型",
+      "summary": "拖延并不只是意志力问题，而是本能脑、情绪脑、理智脑之间的长期拉扯。",
+      "content": "- 本能脑追求即时满足\n- 情绪脑放大焦虑与逃避\n- 理智脑负责规划，但常常最弱",
+      "insights": "适合继续追问如何把认知模型转成具体习惯设计。",
+      "importance": "medium",
+      "tags": ["心理学", "方法论"],
+      "source_type": "knowledge-base",
+      "source_files": ["knowledge-base/__YESTERDAY__.md"],
+      "source_text": "Demo fixture: 三重脑模型",
+      "status": "published",
+      "confidence": 0.95,
+      "knowledge_date": "__YESTERDAY__",
+      "metadata": {
+        "fixture_id": "yesterday-brain-model",
+        "demo_seed": true
+      }
+    }
+  ],
+  "review_cards": [
+    {
+      "title": "MagicGripper：一个传感器承接三种感知",
+      "summary": "这张候选卡展示了机器人传感器融合思路，但还需要人工补齐场景价值和标签。",
+      "content": "- 通过结构设计把视觉、距离、触觉能力合到一套装置里\n- 重点价值在于降低复杂硬件堆叠\n- 适合机器人操作任务",
+      "insights": "待审核时建议补充“为什么重要”和“应用方向”。",
+      "importance": "medium",
+      "tags": ["机器人", "传感器"],
+      "source_type": "demo-upload",
+      "source_files": ["demo/magicgripper.png"],
+      "source_text": "Demo OCR: MagicGripper can integrate distance, vision and touch sensing in a single structure.",
+      "status": "review",
+      "confidence": 0.79,
+      "knowledge_date": "__TODAY__",
+      "metadata": {
+        "fixture_id": "review-magicgripper",
+        "demo_seed": true
+      }
+    }
+  ]
+}

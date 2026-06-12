@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>第二大脑</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">脑</div>
+          <div>
+            <p class="eyebrow">Knowledge OS</p>
+            <h1>第二大脑</h1>
+            <p class="body-sm subtle">围绕每日知识卡片进行浏览、理解与讨论</p>
+          </div>
+        </div>
+
+        <button id="global-search-trigger" class="search-trigger" type="button">
+          <span>搜索卡片、标签和概念</span>
+          <kbd>⌘K</kbd>
+        </button>
+
+        <nav class="sidebar-nav">
+          <button class="nav-item active" data-view="today" type="button">
+            <span class="nav-item-title">Today</span>
+            <span class="nav-item-meta" id="nav-count-today">0</span>
+          </button>
+          <button class="nav-item" data-view="library" type="button">
+            <span class="nav-item-title">Library</span>
+            <span class="nav-item-meta" id="nav-count-library">0</span>
+          </button>
+          <button class="nav-item" data-view="review" type="button">
+            <span class="nav-item-title">Review</span>
+            <span class="nav-item-meta" id="nav-count-review">0</span>
+          </button>
+          <button class="nav-item" data-view="daily" type="button">
+            <span class="nav-item-title">Daily</span>
+            <span class="nav-item-meta">日报</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <p class="sidebar-panel-label">系统动作</p>
+          <button id="run-ingest" class="primary-button" type="button">运行导入</button>
+          <button id="run-digest" class="ghost-button" type="button">生成日报</button>
+          <button id="push-wechat-preview" class="ghost-button" type="button">微信预览</button>
+          <button id="push-wechat-send" class="ghost-button success" type="button">推送微信</button>
+          <button id="demo-seed" class="ghost-button" type="button">注入 Demo</button>
+          <button id="demo-reset" class="ghost-button" type="button">重置 Demo</button>
+          <p class="body-sm subtle">触发截图扫描、抽取与入库。完成后会同步更新今日卡片与审核队列。</p>
+        </div>
+
+        <div class="sidebar-panel status-panel">
+          <p class="sidebar-panel-label">状态概览</p>
+          <div class="status-row">
+            <span>今日卡片</span>
+            <strong id="status-today-count">0</strong>
+          </div>
+          <div class="status-row">
+            <span>待审核</span>
+            <strong id="status-review-count">0</strong>
+          </div>
+          <div class="status-row">
+            <span>已发布</span>
+            <strong id="status-published-count">0</strong>
+          </div>
+        </div>
+
+        <div class="sidebar-panel status-panel">
+          <p class="sidebar-panel-label">运行能力</p>
+          <div id="capability-list" class="capability-list"></div>
+        </div>
+
+        <div class="sidebar-panel status-panel">
+          <p class="sidebar-panel-label">最近运行</p>
+          <div id="latest-run" class="latest-run body-sm subtle">暂无 workflow run</div>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="view-label">Today Workspace</p>
+            <h2 id="view-title">今天的知识更新</h2>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" id="focus-search" type="button">搜索</button>
+            <div class="topbar-clock" id="clock"></div>
+          </div>
+        </header>
+
+        <main class="main-content">
+          <section id="view-today" class="view active">
+            <section class="hero">
+              <div class="hero-copy">
+                <p class="eyebrow">Today Digest</p>
+                <h3>先看到今天最值得读的卡片，再决定要深入哪一张。</h3>
+                <p id="today-summary" class="body-md subtle">今天的学习流会围绕重点卡片展开，阅读和问答始终保持在同一张卡片的上下文里。</p>
+                <div class="hero-actions">
+                  <button id="start-browsing" class="primary-button" type="button">开始浏览</button>
+                  <button id="resume-thread" class="ghost-button" type="button">继续上次讨论</button>
+                </div>
+              </div>
+              <div class="hero-metrics" id="today-hero-metrics"></div>
+            </section>
+
+            <section class="surface section-block">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Card Rail</p>
+                  <h3>今日卡片轨道</h3>
+                </div>
+                <div class="section-actions">
+                  <button class="ghost-button compact-button" id="today-prev" type="button">上一张</button>
+                  <button class="ghost-button compact-button" id="today-next" type="button">下一张</button>
+                </div>
+              </div>
+              <div id="today-rail" class="rail-scroller card-rail"></div>
+            </section>
+
+            <div class="today-layout">
+              <section class="surface section-block detail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Card Detail</p>
+                    <h3>卡片背面</h3>
+                  </div>
+                  <div class="segmented-control">
+                    <button class="segment active" data-detail-panel="overview" type="button">概览</button>
+                    <button class="segment" data-detail-panel="sources" type="button">来源</button>
+                  </div>
+                </div>
+                <div id="today-card-detail" class="detail-content"></div>
+              </section>
+
+              <section class="surface section-block conversation-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Conversation Rail</p>
+                    <h3>单卡讨论轨道</h3>
+                  </div>
+                  <div class="conversation-mode">
+                    <label class="field inline-field">
+                      <span>回答模式</span>
+                      <select id="today-chat-mode">
+                        <option value="knowledge_only">仅基于知识库</option>
+                        <option value="knowledge_plus_web">知识库 + 联网补充</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <div id="thread-rail" class="rail-scroller thread-rail"></div>
+                <div id="today-chat-panel" class="chat-panel"></div>
+              </section>
+            </div>
+          </section>
+
+          <section id="view-library" class="view">
+            <div class="surface toolbar">
+              <form id="library-filters" class="toolbar-grid">
+                <label class="field search-field">
+                  <span>搜索</span>
+                  <input name="q" type="search" placeholder="标题、内容、标签、概念" />
+                </label>
+                <label class="field">
+                  <span>重要性</span>
+                  <select name="importance">
+                    <option value="">全部</option>
+                    <option value="high">高</option>
+                    <option value="medium">中</option>
+                    <option value="low">低</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>日期</span>
+                  <input name="date" type="date" />
+                </label>
+                <div class="toolbar-actions">
+                  <button class="primary-button" type="submit">应用筛选</button>
+                  <button class="ghost-button" id="library-reset" type="button">重置</button>
+                </div>
+              </form>
+              <div id="library-active-filters" class="filter-pills"></div>
+            </div>
+
+            <div class="workspace-grid">
+              <section class="surface rail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Library</p>
+                    <h3>正式卡片库</h3>
+                  </div>
+                  <p id="library-count-label" class="body-sm subtle">0 张卡片</p>
+                </div>
+                <div id="library-list" class="stack-list"></div>
+              </section>
+
+              <section class="surface section-block detail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Detail</p>
+                    <h3>阅读与编辑</h3>
+                  </div>
+                  <div class="segmented-control">
+                    <button class="segment active" data-library-mode="read" type="button">阅读</button>
+                    <button class="segment" data-library-mode="edit" type="button">编辑</button>
+                  </div>
+                </div>
+                <div id="library-detail" class="detail-content"></div>
+              </section>
+            </div>
+          </section>
+
+          <section id="view-review" class="view">
+            <div class="workspace-grid review-grid">
+              <section class="surface rail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Review Queue</p>
+                    <h3>待审核卡片</h3>
+                  </div>
+                  <div class="chip-row">
+                    <button class="chip active" data-review-filter="all" type="button">全部</button>
+                    <button class="chip" data-review-filter="high" type="button">高优先级</button>
+                  </div>
+                </div>
+                <div id="review-list" class="stack-list"></div>
+              </section>
+
+              <section class="surface section-block detail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Candidate</p>
+                    <h3>候选卡片</h3>
+                  </div>
+                </div>
+                <div id="review-detail" class="detail-content"></div>
+              </section>
+            </div>
+          </section>
+
+          <section id="view-daily" class="view">
+            <div class="surface toolbar">
+              <form id="daily-form" class="toolbar-grid daily-toolbar">
+                <label class="field">
+                  <span>日期</span>
+                  <input name="date" type="date" />
+                </label>
+                <div class="toolbar-actions">
+                  <button class="primary-button" type="submit">加载日报</button>
+                  <button id="daily-run-manual" class="ghost-button" type="button">手动生成</button>
+                  <button id="daily-push-preview" class="ghost-button" type="button">微信预览</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="workspace-grid">
+              <section class="surface rail-surface">
+                <div id="daily-metrics" class="metric-grid"></div>
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Daily Cards</p>
+                    <h3>当日卡片</h3>
+                  </div>
+                </div>
+                <div id="daily-list" class="stack-list"></div>
+              </section>
+
+              <section class="surface section-block detail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Digest</p>
+                    <h3>日报摘要</h3>
+                  </div>
+                </div>
+                <pre id="daily-summary" class="summary-box">选择日期查看日报摘要。</pre>
+                <div class="section-heading push-heading">
+                  <div>
+                    <p class="eyebrow">WeChat Push</p>
+                    <h3>微信推荐预览</h3>
+                  </div>
+                  <button id="daily-push-send" class="ghost-button success compact-button" type="button">确认推送</button>
+                </div>
+                <pre id="wechat-preview" class="summary-box push-preview">点击“微信预览”生成将要发送的内容。</pre>
+              </section>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="spotlight" class="spotlight hidden" aria-hidden="true">
+      <div class="spotlight-backdrop" data-close-spotlight="true"></div>
+      <div class="spotlight-panel">
+        <div class="spotlight-input-row">
+          <input id="spotlight-input" type="search" placeholder="搜索标题、标签、摘要" />
+          <button id="spotlight-close" class="ghost-button" type="button">关闭</button>
+        </div>
+        <div id="spotlight-results" class="spotlight-results"></div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden" aria-live="polite"></div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

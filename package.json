@@ -1,0 +1,25 @@
+{
+  "name": "second-brain-screenshot-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "migrate": "node src/migrate.js",
+    "ingest": "node src/ingest.js",
+    "scheduler:plan": "node src/scheduler-cli.js plan",
+    "scheduler:install": "node src/scheduler-cli.js install",
+    "push:preview": "node src/push-cli.js",
+    "push:wechat": "node src/push-cli.js --send",
+    "demo:seed": "node src/demo-cli.js seed",
+    "demo:reset": "node src/demo-cli.js reset",
+    "check": "node --check src/server.js && node --check src/db.js && node --check src/workflows.js && node --check src/demo.js && node --check src/chat.js && node --check src/agent-runtime.js && node --check src/pipeline.js && node --check src/scheduler.js && node --check src/push.js && node --check src/push-cli.js && node --check public/app.js",
+    "test": "node --test",
+    "release:check": "node scripts/release-check.js"
+  },
+  "description": "A local screenshot-to-knowledge-base workbench powered by OCR, OpenClaw agents, review, search, chat, daily digest, and optional WeChat push.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  }
+}

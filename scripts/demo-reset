@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PORT="${PORT:-3017}"
+curl -sS -X POST "http://127.0.0.1:${PORT}/api/demo/reset" \
+  -H 'content-type: application/json' \
+  -d '{}'
+echo
