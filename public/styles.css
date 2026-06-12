@@ -881,6 +881,48 @@ textarea {
   white-space: pre-wrap;
 }
 
+.inline-heading {
+  margin-top: var(--space-5);
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-soft);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.checkbox-field input {
+  width: 18px;
+  height: 18px;
+}
+
+.settings-status,
+.connect-panel {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.settings-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.connect-output {
+  max-height: 320px;
+  overflow: auto;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.05);
+}
+
+code {
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.06);
+}
+
 .push-heading {
   margin-top: 20px;
 }
@@ -1020,6 +1062,7 @@ textarea {
 
   .hero-metrics,
   .metric-grid,
+  .settings-metrics,
   .info-grid,
   .form-grid,
   .toolbar-grid,

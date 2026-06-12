@@ -67,7 +67,18 @@ npm run ingest
 
 或在网页里点击导入按钮。
 
-## 4. OpenClaw Agent 配置
+## 4. 网页设置
+
+打开 `Settings` 页面后，可以配置：
+
+- 截图整理时间
+- 日报生成时间
+- 微信推送时间和是否启用自动推送
+- 微信 channel、account、target、transport
+
+这些设置会保存到本机 `state/settings.json`，默认不会进入 GitHub。
+
+## 5. OpenClaw Agent 配置
 
 项目可以在没有 OpenClaw 模型的情况下运行本地 fallback，用于 Demo 和基础流程。
 
@@ -82,7 +93,19 @@ OPENCLAW_AGENT_TIMEOUT_SECONDS=90
 
 `OPENCLAW_MODEL` 留空时使用 OpenClaw 默认模型。建议先打开网页查看 `Health / Capabilities`，确认模型是否可用。
 
-## 5. 数据目录
+## 6. 微信扫码连接
+
+微信连接依赖 OpenClaw 微信 channel。你可以在 `Settings` 页面点击“扫码连接微信”，也可以手动运行：
+
+```bash
+openclaw plugins install "@tencent-weixin/openclaw-weixin"
+openclaw channels login --channel openclaw-weixin
+openclaw gateway restart
+```
+
+扫码成功后，让目标微信账号给 OpenClaw 发一条消息。这样系统才能获得后续推送需要的回复上下文。
+
+## 7. 数据目录
 
 这些文件和目录是个人运行数据，默认不应提交到 GitHub：
 
@@ -94,7 +117,7 @@ OPENCLAW_AGENT_TIMEOUT_SECONDS=90
 
 备份个人知识库时，优先备份 `state/`、`card-library/` 和 `.env`。
 
-## 6. 发布前检查
+## 8. 发布前检查
 
 维护者发布到 GitHub 前运行：
 

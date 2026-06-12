@@ -95,9 +95,21 @@ OPENCLAW_AGENT_TIMEOUT_SECONDS=90
 npm run scheduler:plan
 ```
 
-## 8. 可选：定时任务
+## 8. 可选：设置自动整理和微信推送时间
 
-查看默认计划：
+打开网页的 `Settings` 页面，可以设置：
+
+- 截图整理时间，例如 `10:00, 16:00`
+- 日报生成时间，例如 `22:00`
+- 微信推送时间，例如 `22:30`
+- 是否启用定时微信推送
+- 微信 channel、account、target、transport 和每次推送卡片数
+
+设置会保存到本机 `state/settings.json`，默认不会提交到 GitHub。
+
+## 9. 可选：安装 OpenClaw 定时任务
+
+查看当前计划：
 
 ```bash
 npm run scheduler:plan
@@ -114,11 +126,22 @@ npm run scheduler:install
 - 10:00 截图扫描
 - 16:00 截图扫描
 - 22:00 生成日报
-- 22:30 推送预留步骤
 
-当前项目默认不绑定任何真实推送渠道。
+微信推送默认关闭；只有在 `Settings` 页面启用“定时微信推送”后，计划里才会出现微信推送任务。
 
-## 9. 备份建议
+## 10. 可选：扫码连接微信
+
+微信连接依赖 OpenClaw 微信 channel。本项目提供 `Settings` 页的“扫码连接微信”入口，也可以在终端手动运行：
+
+```bash
+openclaw plugins install "@tencent-weixin/openclaw-weixin"
+openclaw channels login --channel openclaw-weixin
+openclaw gateway restart
+```
+
+扫码成功后，让目标微信账号给 OpenClaw 发一条消息，以便生成后续推送需要的 context token。
+
+## 11. 备份建议
 
 建议备份这些目录和文件：
 

@@ -13,6 +13,9 @@ const state = {
   todayCards: [],
   dailyCards: [],
   wechatPreview: null,
+  settings: null,
+  schedulerPlan: [],
+  wechatConnect: null,
   capabilities: {},
   health: {},
   latestRun: null,
@@ -87,7 +90,8 @@ function renderCapabilities() {
     ["Agent Model", capabilities.openclaw_model_available],
     ["Temporal", capabilities.temporal],
     ["Web Search", capabilities.web_search],
-    ["Push", capabilities.push_channel]
+    ["Push", capabilities.push_channel],
+    ["WeChat", capabilities.wechat_connected]
   ];
   qs("#capability-list").innerHTML = rows
     .map(
@@ -133,7 +137,8 @@ function setViewMeta(viewName) {
     today: { label: "Today Workspace", title: "今天的知识更新" },
     library: { label: "Knowledge Library", title: "卡片库" },
     review: { label: "Review Flow", title: "待审核" },
-    daily: { label: "Daily Digest", title: "日报" }
+    daily: { label: "Daily Digest", title: "日报" },
+    settings: { label: "Personal Setup", title: "个人设置" }
   };
   const meta = metadata[viewName];
   qs("#view-label").textContent = meta.label;
@@ -975,13 +980,141 @@ function renderWechatPreview() {
   ].join("\n");
 }
 
+function syncSettingsForm() {
+  if (!state.settings) return;
+  const form = qs("#settings-form");
+  const schedule = state.settings.schedule || {};
+  const wechat = state.settings.wechat || {};
+  form.elements.timezone.value = schedule.timezone || "Asia/Shanghai";
+  form.elements.ingest_times.value = (schedule.ingest_times || []).join(", ");
+  form.elements.digest_time.value = schedule.digest_time || "22:00";
+  form.elements.wechat_push_time.value = schedule.wechat_push_time || "22:30";
+  form.elements.auto_push_enabled.checked = Boolean(wechat.auto_push_enabled);
+  form.elements.channel.value = wechat.channel || "openclaw-weixin";
+  form.elements.account.value = wechat.account || "";
+  form.elements.target.value = wechat.target || "";
+  form.elements.transport.value = wechat.transport || "weixin-api";
+  form.elements.openclaw_config_path.value = wechat.openclaw_config_path || "";
+  form.elements.max_cards.value = wechat.max_cards || 5;
+}
+
+function renderSettingsStatus() {
+  const settings = state.settings || {};
+  const schedule = settings.schedule || {};
+  const wechat = settings.wechat || {};
+  const connection = state.wechatConnect?.item || state.wechatConnect?.connection || {};
+  const planRows = state.schedulerPlan.length
+    ? state.schedulerPlan.map((job) => `<li>${escapeHtml(job.name)} · ${escapeHtml(job.cron)} · ${escapeHtml(job.timezone)}</li>`).join("")
+    : "<li>尚未加载定时计划。</li>";
+
+  qs("#settings-status").innerHTML = `
+    <div class="metric-grid settings-metrics">
+      <div class="metric-card compact-metric">
+        <span>整理时间</span>
+        <strong>${escapeHtml((schedule.ingest_times || []).join(" / ") || "未设置")}</strong>
+      </div>
+      <div class="metric-card compact-metric">
+        <span>日报时间</span>
+        <strong>${escapeHtml(schedule.digest_time || "未设置")}</strong>
+      </div>
+      <div class="metric-card compact-metric">
+        <span>微信推送</span>
+        <strong>${wechat.auto_push_enabled ? escapeHtml(schedule.wechat_push_time || "") : "关闭"}</strong>
+      </div>
+    </div>
+    <article class="info-panel">
+      <div class="section-title">当前定时计划</div>
+      <ul class="content-list">${planRows}</ul>
+    </article>
+    <article class="info-panel">
+      <div class="section-title">微信连接状态</div>
+      <p class="body-md">通道：${escapeHtml(connection.channel || wechat.channel || "openclaw-weixin")}</p>
+      <p class="body-md">账号数：${escapeHtml(String(connection.account_count ?? 0))} · CLI：${connection.cli_exists ? "可用" : "不可用"} · 上下文：${connection.context_ready ? "已就绪" : "未就绪"}</p>
+      <p class="body-sm subtle">${escapeHtml(connection.note || "扫码登录后，让目标微信先给 OpenClaw 发一条消息，即可建立回复上下文。")}</p>
+    </article>
+  `;
+}
+
+function renderWechatConnectPanel() {
+  const payload = state.wechatConnect || {};
+  const session = payload.session || payload;
+  const connection = payload.item || payload.connection || {};
+  const qrLink = session.qr_url
+    ? `<a class="primary-button compact-button" href="${escapeHtml(session.qr_url)}" target="_blank" rel="noreferrer">打开二维码链接</a>`
+    : "";
+  qs("#wechat-connect-panel").innerHTML = `
+    <article class="info-panel">
+      <div class="section-title">扫码连接</div>
+      <p class="body-md">状态：${escapeHtml(session.status || "idle")}</p>
+      <p class="body-sm subtle">标准命令：<code>${escapeHtml(connection.connect_command || "openclaw channels login --channel openclaw-weixin")}</code></p>
+      <div class="inline-actions">${qrLink}</div>
+      <pre class="summary-box connect-output">${escapeHtml(session.output || "点击“扫码连接微信”后，这里会显示 OpenClaw 登录输出。若 CLI 不在本机可用，请复制上面的命令到终端运行。")}</pre>
+    </article>
+  `;
+}
+
+async function loadSettings() {
+  const [settingsResponse, planResponse, wechatResponse] = await Promise.all([
+    api("/api/settings"),
+    api("/api/scheduler/plan"),
+    api("/api/wechat/connect")
+  ]);
+  state.settings = settingsResponse.item;
+  state.schedulerPlan = planResponse.items || [];
+  state.wechatConnect = wechatResponse;
+  syncSettingsForm();
+  renderSettingsStatus();
+  renderWechatConnectPanel();
+}
+
+async function saveSettings(form) {
+  const data = Object.fromEntries(new FormData(form));
+  const result = await api("/api/settings", {
+    method: "PUT",
+    body: JSON.stringify({
+      schedule: {
+        timezone: data.timezone,
+        ingest_times: String(data.ingest_times || "").split(",").map((item) => item.trim()),
+        digest_time: data.digest_time,
+        wechat_push_time: data.wechat_push_time
+      },
+      wechat: {
+        channel: data.channel,
+        account: data.account,
+        target: data.target,
+        transport: data.transport,
+        openclaw_config_path: data.openclaw_config_path,
+        max_cards: data.max_cards,
+        auto_push_enabled: Boolean(data.auto_push_enabled)
+      }
+    })
+  });
+  state.settings = result.item;
+  await loadSettings();
+  await loadCapabilities();
+  showToast("设置已保存", "success");
+}
+
+async function startWechatConnect() {
+  state.wechatConnect = await api("/api/wechat/connect/start", { method: "POST", body: "{}" });
+  renderWechatConnectPanel();
+  renderSettingsStatus();
+  showToast(state.wechatConnect.ok ? "已启动微信扫码连接" : "无法启动扫码连接", state.wechatConnect.ok ? "success" : "warning");
+}
+
+async function refreshWechatConnect() {
+  state.wechatConnect = await api("/api/wechat/connect");
+  renderWechatConnectPanel();
+  renderSettingsStatus();
+}
+
 async function previewWechatPush() {
   const date = qs('#daily-form input[name="date"]').value || TODAY_DATE;
   const result = await api("/api/push/wechat", {
     method: "POST",
     body: JSON.stringify({
       date,
-      limit: 5,
+      limit: state.settings?.wechat?.max_cards || 5,
       dry_run: true
     })
   });
@@ -1000,7 +1133,7 @@ async function sendWechatPush() {
     method: "POST",
     body: JSON.stringify({
       date: preview.date || qs('#daily-form input[name="date"]').value || TODAY_DATE,
-      limit: 5,
+      limit: state.settings?.wechat?.max_cards || 5,
       dry_run: false,
       confirm: true
     })
@@ -1035,6 +1168,7 @@ function updateStats() {
 }
 
 async function refreshAllData() {
+  await loadSettings();
   await loadReview();
   await loadLibrary(new URLSearchParams(state.activeLibraryFilters));
   await loadTodayCards();
@@ -1213,6 +1347,17 @@ function bindGlobalHandlers() {
   });
   qs("#daily-push-preview").addEventListener("click", previewWechatPush);
   qs("#daily-push-send").addEventListener("click", sendWechatPush);
+
+  qs("#settings-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await saveSettings(event.currentTarget);
+  });
+  qs("#settings-preview-schedule").addEventListener("click", async () => {
+    await loadSettings();
+    showToast("定时计划已刷新", "success");
+  });
+  qs("#settings-connect-wechat").addEventListener("click", startWechatConnect);
+  qs("#settings-refresh-wechat").addEventListener("click", refreshWechatConnect);
 
   qs("#global-search-trigger").addEventListener("click", openSpotlight);
   qs("#focus-search").addEventListener("click", openSpotlight);

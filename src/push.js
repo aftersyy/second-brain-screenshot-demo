@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { createWorkflowRun, addWorkflowStep, listCards, updateWorkflowRun } from "./db.js";
+import { readSettings } from "./settings.js";
 import { nowIso, safeParseJson, summarizeText } from "./utils.js";
 
 const IMPORTANCE_RANK = {
@@ -31,19 +32,21 @@ function resolveHomePath(filePath) {
 
 function getPushConfig() {
   const defaultCli = "openclaw";
+  const settings = readSettings();
+  const wechat = settings.wechat;
   return {
-    channel: process.env.WECHAT_PUSH_CHANNEL || "openclaw-weixin",
-    target: process.env.WECHAT_PUSH_TARGET || "",
-    account: process.env.WECHAT_PUSH_ACCOUNT || "",
-    transport: process.env.WECHAT_PUSH_TRANSPORT || "weixin-api",
+    channel: wechat.channel || process.env.WECHAT_PUSH_CHANNEL || "openclaw-weixin",
+    target: wechat.target || process.env.WECHAT_PUSH_TARGET || "",
+    account: wechat.account || process.env.WECHAT_PUSH_ACCOUNT || "",
+    transport: wechat.transport || process.env.WECHAT_PUSH_TRANSPORT || "weixin-api",
     cliPath: resolveHomePath(process.env.WECHAT_PUSH_OPENCLAW_CLI || process.env.OPENCLAW_CLI || defaultCli),
     nodeBinary: process.env.WECHAT_PUSH_NODE || process.env.OPENCLAW_NODE || process.execPath,
     configPath: resolveHomePath(
-      process.env.WECHAT_PUSH_OPENCLAW_CONFIG_PATH || path.join(os.homedir(), ".openclaw", "openclaw.json")
+      wechat.openclaw_config_path || process.env.WECHAT_PUSH_OPENCLAW_CONFIG_PATH || path.join(os.homedir(), ".openclaw", "openclaw.json")
     ),
     timeoutMs: Number(process.env.WECHAT_PUSH_TIMEOUT_MS || 30000),
     cronTimeoutMs: Number(process.env.WECHAT_PUSH_CRON_TIMEOUT_MS || 180000),
-    maxCards: Number(process.env.WECHAT_PUSH_MAX_CARDS || 5),
+    maxCards: Number(wechat.max_cards || process.env.WECHAT_PUSH_MAX_CARDS || 5),
     appUrl: process.env.KNOWLEDGE_AGENT_APP_URL || "http://127.0.0.1:3017"
   };
 }

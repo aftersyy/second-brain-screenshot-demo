@@ -11,7 +11,9 @@ import { writeCardMarkdown } from "./markdown.js";
 import { migrateLegacyData } from "./migrate.js";
 import { buildWechatRecommendationPreview, pushWechatRecommendation } from "./push.js";
 import { getSchedulerPlan, installOpenClawCronJobs } from "./scheduler.js";
+import { readSettings, writeSettings } from "./settings.js";
 import { nowIso, parseTags } from "./utils.js";
+import { getWechatConnectionStatus, readWechatQrConnectSession, startWechatQrConnect } from "./wechat-connect.js";
 import {
   approveCandidateWorkflow,
   readWorkflowRun,
@@ -277,6 +279,27 @@ function createServer() {
           message: String(error.message || error)
         });
       }
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/settings") {
+      sendJson(response, 200, { item: readSettings() });
+      return;
+    }
+
+    if (request.method === "PUT" && url.pathname === "/api/settings") {
+      const body = await readJson(request);
+      sendJson(response, 200, { item: writeSettings(body) });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/wechat/connect") {
+      sendJson(response, 200, { item: getWechatConnectionStatus(), session: readWechatQrConnectSession() });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/wechat/connect/start") {
+      sendJson(response, 200, startWechatQrConnect());
       return;
     }
 

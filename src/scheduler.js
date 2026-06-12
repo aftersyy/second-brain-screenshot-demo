@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { getOpenClawRuntimeStatus } from "./agent-runtime.js";
+import { readSettings } from "./settings.js";
 
 function buildOpenClawInvocation(status, args) {
   const cliPath = status.cli_path || "openclaw";
@@ -9,37 +10,40 @@ function buildOpenClawInvocation(status, args) {
     : { command: cliPath, args };
 }
 
-const DEFAULT_JOBS = [
-  {
-    name: "第二大脑截图扫描 10:00",
-    cron: "0 10 * * *",
-    message: "运行第二大脑截图扫描导入流程，生成待审核知识卡片。",
-    agent: process.env.OPENCLAW_INGEST_AGENT || "ingest-agent"
-  },
-  {
-    name: "第二大脑截图扫描 16:00",
-    cron: "0 16 * * *",
-    message: "运行第二大脑截图扫描导入流程，生成待审核知识卡片。",
-    agent: process.env.OPENCLAW_INGEST_AGENT || "ingest-agent"
-  },
-  {
-    name: "第二大脑日报生成 22:00",
-    cron: "0 22 * * *",
-    message: "运行第二大脑日报生成流程，整合今天已发布的知识卡片。",
-    agent: process.env.OPENCLAW_DIGEST_AGENT || "digest-agent"
-  },
-  {
-    name: "第二大脑推送预留 22:30",
-    cron: "30 22 * * *",
-    message: "检查第二大脑日报推送预留步骤；如果没有可推送渠道，只记录状态。",
-    agent: process.env.OPENCLAW_DIGEST_AGENT || "digest-agent"
-  }
-];
+function timeToCron(time) {
+  const [hour, minute] = String(time).split(":");
+  return `${Number(minute)} ${Number(hour)} * * *`;
+}
 
 export function getSchedulerPlan() {
-  return DEFAULT_JOBS.map((job) => ({
+  const settings = readSettings();
+  const jobs = [];
+  for (const time of settings.schedule.ingest_times) {
+    jobs.push({
+      name: `第二大脑截图扫描 ${time}`,
+      cron: timeToCron(time),
+      message: "运行第二大脑截图扫描导入流程，生成待审核知识卡片。",
+      agent: process.env.OPENCLAW_INGEST_AGENT || "ingest-agent"
+    });
+  }
+  jobs.push({
+    name: `第二大脑日报生成 ${settings.schedule.digest_time}`,
+    cron: timeToCron(settings.schedule.digest_time),
+    message: "运行第二大脑日报生成流程，整合今天已发布的知识卡片。",
+    agent: process.env.OPENCLAW_DIGEST_AGENT || "digest-agent"
+  });
+  if (settings.wechat.auto_push_enabled && settings.schedule.wechat_push_time) {
+    jobs.push({
+      name: `第二大脑微信推送 ${settings.schedule.wechat_push_time}`,
+      cron: timeToCron(settings.schedule.wechat_push_time),
+      message: "运行第二大脑微信卡片推荐推送流程；如果没有可推送渠道，只记录状态。",
+      agent: process.env.OPENCLAW_DIGEST_AGENT || "digest-agent"
+    });
+  }
+
+  return jobs.map((job) => ({
     ...job,
-    timezone: process.env.TZ || "Asia/Shanghai",
+    timezone: settings.schedule.timezone,
     session: "isolated",
     light_context: true
   }));

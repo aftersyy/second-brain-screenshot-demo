@@ -88,6 +88,11 @@ export function readUserMarkdown() {
 }
 
 export function getScreenshotDir() {
+  if (process.env.SCREENSHOT_DIR) {
+    return process.env.SCREENSHOT_DIR.startsWith("~/")
+      ? path.join(process.env.HOME || "", process.env.SCREENSHOT_DIR.slice(2))
+      : process.env.SCREENSHOT_DIR;
+  }
   const text = readUserMarkdown();
   const match = text.match(/截图文件夹.*?`([^`]+)`/);
   return match ? match[1] : null;

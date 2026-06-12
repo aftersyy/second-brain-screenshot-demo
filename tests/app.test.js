@@ -221,13 +221,51 @@ test("agent pipeline falls back when OpenClaw model is unavailable", async () =>
 });
 
 test("scheduler exposes OpenClaw cron plan without installing jobs", async () => {
+  const root = createFixtureRoot();
+  process.env.KNOWLEDGE_AGENT_ROOT = root;
+
   const { getSchedulerPlan, installOpenClawCronJobs } = await import("../src/scheduler.js");
   const plan = getSchedulerPlan();
 
-  assert.equal(plan.length, 4);
+  assert.equal(plan.length, 3);
   assert.match(plan[0].name, /截图扫描/);
 
   const dryRun = installOpenClawCronJobs({ dryRun: true });
   assert.equal(dryRun.dry_run, true);
-  assert.equal(dryRun.jobs.length, 4);
+  assert.equal(dryRun.jobs.length, 3);
+});
+
+test("user settings drive schedule and wechat push configuration", async () => {
+  const root = createFixtureRoot();
+  process.env.KNOWLEDGE_AGENT_ROOT = root;
+
+  const { writeSettings, readSettings } = await import("../src/settings.js");
+  const { getSchedulerPlan } = await import("../src/scheduler.js");
+
+  const settings = writeSettings({
+    schedule: {
+      timezone: "Asia/Shanghai",
+      ingest_times: ["09:30", "18:15"],
+      digest_time: "21:10",
+      wechat_push_time: "21:40"
+    },
+    wechat: {
+      channel: "openclaw-weixin",
+      target: "demo-user",
+      account: "demo-account",
+      transport: "weixin-api",
+      max_cards: 3,
+      auto_push_enabled: true
+    }
+  });
+
+  assert.deepEqual(readSettings().schedule.ingest_times, ["09:30", "18:15"]);
+  assert.equal(settings.wechat.max_cards, 3);
+
+  const plan = getSchedulerPlan();
+  assert.equal(plan.length, 4);
+  assert.equal(plan[0].cron, "30 9 * * *");
+  assert.equal(plan[1].cron, "15 18 * * *");
+  assert.equal(plan[2].cron, "10 21 * * *");
+  assert.equal(plan[3].cron, "40 21 * * *");
 });

@@ -40,6 +40,10 @@
             <span class="nav-item-title">Daily</span>
             <span class="nav-item-meta">日报</span>
           </button>
+          <button class="nav-item" data-view="settings" type="button">
+            <span class="nav-item-title">Settings</span>
+            <span class="nav-item-meta">设置</span>
+          </button>
         </nav>
 
         <div class="sidebar-panel">
@@ -286,6 +290,103 @@
                   <button id="daily-push-send" class="ghost-button success compact-button" type="button">确认推送</button>
                 </div>
                 <pre id="wechat-preview" class="summary-box push-preview">点击“微信预览”生成将要发送的内容。</pre>
+              </section>
+            </div>
+          </section>
+
+          <section id="view-settings" class="view">
+            <div class="workspace-grid">
+              <section class="surface section-block">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Automation</p>
+                    <h3>自动整理与推送时间</h3>
+                  </div>
+                </div>
+                <form id="settings-form" class="editor-form">
+                  <div class="form-grid">
+                    <label class="field">
+                      <span>时区</span>
+                      <input name="timezone" placeholder="Asia/Shanghai" />
+                    </label>
+                    <label class="field">
+                      <span>截图整理时间</span>
+                      <input name="ingest_times" placeholder="10:00, 16:00" />
+                    </label>
+                    <label class="field">
+                      <span>日报生成时间</span>
+                      <input name="digest_time" type="time" />
+                    </label>
+                    <label class="field">
+                      <span>微信推送时间</span>
+                      <input name="wechat_push_time" type="time" />
+                    </label>
+                  </div>
+                  <label class="checkbox-field">
+                    <input name="auto_push_enabled" type="checkbox" />
+                    <span>启用定时微信推送</span>
+                  </label>
+
+                  <div class="section-heading inline-heading">
+                    <div>
+                      <p class="eyebrow">WeChat</p>
+                      <h3>微信连接</h3>
+                    </div>
+                  </div>
+                  <div class="form-grid">
+                    <label class="field">
+                      <span>Channel</span>
+                      <input name="channel" placeholder="openclaw-weixin" />
+                    </label>
+                    <label class="field">
+                      <span>Account</span>
+                      <input name="account" placeholder="OpenClaw 微信账号 ID" />
+                    </label>
+                    <label class="field">
+                      <span>Target</span>
+                      <input name="target" placeholder="收到推送的微信用户 ID" />
+                    </label>
+                    <label class="field">
+                      <span>Transport</span>
+                      <select name="transport">
+                        <option value="weixin-api">weixin-api</option>
+                        <option value="cron-delivery">cron-delivery</option>
+                        <option value="message-send">message-send</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>OpenClaw config path</span>
+                      <input name="openclaw_config_path" placeholder="~/.openclaw/openclaw.json" />
+                    </label>
+                    <label class="field">
+                      <span>每次推送卡片数</span>
+                      <input name="max_cards" type="number" min="1" max="12" />
+                    </label>
+                  </div>
+                  <div class="composer-actions">
+                    <button class="primary-button" type="submit">保存设置</button>
+                    <button id="settings-preview-schedule" class="ghost-button" type="button">查看定时计划</button>
+                    <button id="settings-connect-wechat" class="ghost-button success" type="button">扫码连接微信</button>
+                  </div>
+                </form>
+              </section>
+
+              <section class="surface section-block detail-surface">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Status</p>
+                    <h3>连接与定时状态</h3>
+                  </div>
+                </div>
+                <div id="settings-status" class="settings-status"></div>
+                <div class="section-heading inline-heading">
+                  <div>
+                    <p class="eyebrow">QR Login</p>
+                    <h3>扫码连接输出</h3>
+                  </div>
+                  <button id="settings-refresh-wechat" class="ghost-button compact-button" type="button">刷新状态</button>
+                </div>
+                <div id="wechat-connect-panel" class="connect-panel"></div>
               </section>
             </div>
           </section>

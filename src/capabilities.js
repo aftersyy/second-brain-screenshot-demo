@@ -9,6 +9,7 @@ import {
 } from "./config.js";
 import { getOpenClawRuntimeStatus } from "./agent-runtime.js";
 import { getPushRuntimeStatus } from "./push.js";
+import { getWechatConnectionStatus } from "./wechat-connect.js";
 
 function parseHostPort(value) {
   if (!value) return null;
@@ -39,6 +40,7 @@ function checkSocket(address, timeoutMs = 250) {
 export function getSystemCapabilities() {
   const openclaw = getOpenClawRuntimeStatus();
   const push = getPushRuntimeStatus();
+  const wechat = getWechatConnectionStatus();
   return {
     demo_mode: isDemoMode(),
     openai_agents: hasOpenAiKey(),
@@ -50,7 +52,9 @@ export function getSystemCapabilities() {
     web_search: isWebSearchEnabled(),
     push_channel: push.ok,
     push_channel_name: push.channel,
-    push_target: push.target
+    push_target: push.target,
+    wechat_connected: wechat.ok,
+    wechat_account_count: wechat.account_count
   };
 }
 
